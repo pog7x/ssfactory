@@ -1,6 +1,6 @@
 module github.com/pog7x/ssfactory
 
-go 1.17
+go 1.19
 
 require github.com/tebeka/selenium v0.9.9
 
