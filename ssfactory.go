@@ -12,8 +12,19 @@ import (
 )
 
 const (
-	firefoxName = "firefox"
-	chromeName  = "chrome"
+	FirefoxName = "firefox"
+	ChromeName  = "chrome"
+)
+
+const (
+	ByID              = "id"
+	ByXPATH           = "xpath"
+	ByLinkText        = "link text"
+	ByPartialLinkText = "partial link text"
+	ByName            = "name"
+	ByTagName         = "tag name"
+	ByClassName       = "class name"
+	ByCSSSelector     = "css selector"
 )
 
 type Factory struct {
@@ -54,7 +65,7 @@ func NewFactory(init InitFactory) (*Factory, func(), error) {
 	}
 
 	switch init.UseBrowser {
-	case firefoxName:
+	case FirefoxName:
 		firefoxSvc, err := firefoxdrv.NewServiceFirefox(
 			firefoxdrv.InitFirefox{
 				WebdriverPort:     init.WebdriverPort,
@@ -68,7 +79,7 @@ func NewFactory(init InitFactory) (*Factory, func(), error) {
 		}
 		f.firefoxService = firefoxSvc
 		f.capabilities.AddFirefox(f.firefoxService.FirefoxCaps)
-	case chromeName:
+	case ChromeName:
 		chromeSvc, err := chromedrv.NewServiceChrome(
 			chromedrv.InitChrome{
 				WebdriverPort:    init.WebdriverPort,
@@ -87,10 +98,14 @@ func NewFactory(init InitFactory) (*Factory, func(), error) {
 		return nil, func() {}, fmt.Errorf("specified invalid browser name (%s)", init.UseBrowser)
 	}
 
+	if err := f.runFactory(); err != nil {
+		return nil, func() {}, err
+	}
+
 	return f, f.stopFactory, nil
 }
 
-func (f *Factory) RunFactory() error {
+func (f *Factory) runFactory() error {
 	f.wp.Run()
 	wd, err := selenium.NewRemote(f.capabilities, fmt.Sprintf("http://localhost:%d%s", f.webdriverPort, f.urlBase))
 	if err != nil {
@@ -119,17 +134,6 @@ func (f *Factory) stopFactory() {
 		f.wp.Stop()
 	}
 }
-
-const (
-	ByID              = "id"
-	ByXPATH           = "xpath"
-	ByLinkText        = "link text"
-	ByPartialLinkText = "partial link text"
-	ByName            = "name"
-	ByTagName         = "tag name"
-	ByClassName       = "class name"
-	ByCSSSelector     = "css selector"
-)
 
 type bytesHandler func([]byte) error
 

@@ -2,43 +2,6 @@ package workerpool
 
 import "sync"
 
-type worker struct {
-	jobCh chan func()
-	pool  chan chan func()
-	done  chan struct{}
-}
-
-func newWorker(workerPool chan chan func()) worker {
-	return worker{
-		jobCh: make(chan func()),
-		pool:  workerPool,
-		done:  make(chan struct{}),
-	}
-}
-
-func (w worker) start() {
-	go func() {
-		for {
-			w.registerAvailableWorker()
-
-			select {
-			case job := <-w.jobCh:
-				job()
-			case <-w.done:
-				return
-			}
-		}
-	}()
-}
-
-func (w worker) registerAvailableWorker() {
-	w.pool <- w.jobCh
-}
-
-func (w worker) stop() {
-	close(w.done)
-}
-
 type WorkerPool struct {
 	jobQueue         chan func()
 	maxWorkers       uint8
@@ -99,4 +62,41 @@ func (wp *WorkerPool) Do(job func()) {
 	if !wp.closed {
 		wp.jobQueue <- job
 	}
+}
+
+type worker struct {
+	jobCh chan func()
+	pool  chan chan func()
+	done  chan struct{}
+}
+
+func newWorker(workerPool chan chan func()) worker {
+	return worker{
+		jobCh: make(chan func()),
+		pool:  workerPool,
+		done:  make(chan struct{}),
+	}
+}
+
+func (w worker) start() {
+	go func() {
+		for {
+			w.registerAvailableWorker()
+
+			select {
+			case job := <-w.jobCh:
+				job()
+			case <-w.done:
+				return
+			}
+		}
+	}()
+}
+
+func (w worker) registerAvailableWorker() {
+	w.pool <- w.jobCh
+}
+
+func (w worker) stop() {
+	close(w.done)
 }
