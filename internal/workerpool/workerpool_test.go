@@ -13,7 +13,7 @@ func TestMain(m *testing.M) {
 func TestWorkerPool_OneWorkerMultipleJobs(t *testing.T) {
 	t.Parallel()
 
-	wp := NewWP(uint8(1))
+	wp := NewWP(1)
 	wp.Run()
 	defer wp.Stop()
 
@@ -34,7 +34,7 @@ func TestWorkerPool_OneWorkerMultipleJobs(t *testing.T) {
 func TestWorkerPool_MultipleWorkersMultipleJobs(t *testing.T) {
 	t.Parallel()
 
-	wp := NewWP(uint8(30))
+	wp := NewWP(30)
 	wp.Run()
 	defer wp.Stop()
 
@@ -55,7 +55,7 @@ func TestWorkerPool_MultipleWorkersMultipleJobs(t *testing.T) {
 func TestWorkerPool_ConcurrentIncomingJobs(t *testing.T) {
 	t.Parallel()
 
-	wp := NewWP(uint8(30))
+	wp := NewWP(30)
 	wp.Run()
 	defer wp.Stop()
 
@@ -78,7 +78,7 @@ func TestWorkerPool_ConcurrentIncomingJobs(t *testing.T) {
 func TestWorkerPool_Stop(t *testing.T) {
 	t.Parallel()
 
-	wp := NewWP(uint8(10))
+	wp := NewWP(10)
 	wp.Run()
 	defer wp.Stop()
 
@@ -105,7 +105,7 @@ func TestWorkerPool_Stop(t *testing.T) {
 func TestWorkerPool_OverflowJobs(t *testing.T) {
 	t.Parallel()
 
-	wp := NewWP(uint8(2))
+	wp := NewWP(2)
 	wp.Run()
 	defer wp.Stop()
 
@@ -173,7 +173,7 @@ func benchDoWorkers(n int, b *testing.B) {
 	wg.Add(b.N * nWorkers)
 	b.ResetTimer()
 	b.ReportAllocs()
-	wp := NewWP(uint8(nWorkers))
+	wp := NewWP(nWorkers)
 	wp.Run()
 	defer wp.Stop()
 	for i := 0; i < b.N; i++ {

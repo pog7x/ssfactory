@@ -54,7 +54,7 @@ type InitFactory struct {
 	ChromeArgs       []string
 	ChromedriverPath string
 
-	WorkersCount uint8
+	WorkersCount int
 }
 
 func NewFactory(init InitFactory) (*Factory, func(), error) {

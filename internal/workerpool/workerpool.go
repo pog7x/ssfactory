@@ -4,16 +4,16 @@ import "sync"
 
 type WorkerPool struct {
 	jobQueue         chan func()
-	maxWorkers       uint8
+	maxWorkers       int
 	workers          []worker
 	availableWorkers chan chan func()
 	closed           bool
 	once             sync.Once
 }
 
-func NewWP(nWorkers uint8) *WorkerPool {
-	if nWorkers == 0 {
-		nWorkers = 1
+func NewWP(nWorkers int) *WorkerPool {
+	if nWorkers < 0 {
+		nWorkers = 0
 	}
 	wp := WorkerPool{
 		jobQueue:         make(chan func(), 1),
@@ -26,13 +26,17 @@ func NewWP(nWorkers uint8) *WorkerPool {
 }
 
 func (wp *WorkerPool) Run() {
-	for i := uint8(0); i < wp.maxWorkers; i++ {
-		worker := newWorker(wp.availableWorkers)
-		wp.workers = append(wp.workers, worker)
-		worker.start()
-	}
+	if wp.maxWorkers > 0 {
+		for i := 0; i < wp.maxWorkers; i++ {
+			worker := newWorker(wp.availableWorkers)
+			wp.workers = append(wp.workers, worker)
+			worker.start()
+		}
 
-	go wp.dispatch()
+		go wp.dispatch()
+	} else {
+		wp.closed = true
+	}
 }
 
 func (wp *WorkerPool) dispatch() {
@@ -61,6 +65,8 @@ func (wp *WorkerPool) Stop() {
 func (wp *WorkerPool) Do(job func()) {
 	if !wp.closed {
 		wp.jobQueue <- job
+	} else {
+		job()
 	}
 }
 

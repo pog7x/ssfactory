@@ -4,14 +4,12 @@
 [![Build Status](https://github.com/pog7x/ssfactory/actions/workflows/go.yml/badge.svg)](https://github.com/pog7x/ssfactory/actions/workflows/go.yml)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/pog7x/ssfactory/blob/master/LICENSE)
 
-## Example of factory initializing
+## Example of factory initialization and making screenshot
 
 ```go
 package main
 
-import (
-	"github.com/pog7x/ssfactory"
-)
+import "github.com/pog7x/ssfactory"
 
 func someActionsOnBytes(screenshotBytes []byte) error {
 	// Some actions on bytes (encode to png, send via http/rmq etc.)
@@ -31,7 +29,6 @@ func main() {
 				"--disable-dev-shm-usage",
 				"--width=1920",
 			},
-			WorkersCount: 8,
 		},
 	)
 	if err != nil {
@@ -41,9 +38,10 @@ func main() {
 	defer stopFunc()
 
 	var maximize string
-	go f.MakeScreenshot(
+
+	f.MakeScreenshot(
 		ssfactory.MakeScreenshotPayload{
-			URL:            "https://pog7x.github.io/evklid/",
+			URL:            "https://github.com",
 			DOMElementBy:   ssfactory.ByTagName,
 			DOMElementName: "body",
 			Scroll:         true,
